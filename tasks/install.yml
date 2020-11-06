@@ -1,0 +1,30 @@
+---
+- name: Configure rsyslog.conf to accept log from client
+  lineinfile: 
+    path: /etc/rsyslog.conf
+    insertafter: ^\#input\(type\=\"imudp\" port\=\"514\"\)
+    line: input(type="imudp" port="514")
+
+- name: Configure rsyslog.conf to accept log from client
+  lineinfile: 
+    path: /etc/rsyslog.conf
+    insertbefore: ^input\(type\=\"imudp\" port\=\"514\"\)
+    line: module(load="imudp")
+
+- name: Configure rsyslog.conf to have a template
+  lineinfile: 
+    path: /etc/rsyslog.conf
+    insertafter: ^input\(type\=\"imudp\" port\=\"514\"\)
+    line: $template RemoteLogs,"/var/log/%HOSTNAME%/%PROGRAMNAME%.log"
+
+- name: Configure rsyslog.conf to receive all log
+  lineinfile: 
+    path: /etc/rsyslog.conf
+    insertafter: ^\$template
+    line: "*.* ?RemoteLogs"
+
+- name: restart rsyslog
+  systemd: 
+    daemon_reload: yes
+    state: restarted
+    name: rsyslog
